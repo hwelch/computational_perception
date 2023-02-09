@@ -129,3 +129,28 @@ def plot_detection_types(si, y, theta, title="Graph with detection types"):
     plt.title(title)
     plt.show()
 
+
+def falsepos(theta, N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    waveform, event_indices = genwaveform(N, alpha, A, sigma, noisetype)
+    tp, fn, fp, tn = detectioncounts(event_indices, waveform, theta)
+    return fp / (fp + tn)
+
+def falseneg(theta, N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    waveform, event_indices = genwaveform(N, alpha, A, sigma, noisetype)
+    tp, fn, fp, tn = detectioncounts(event_indices, waveform, theta)
+    return fn / (fn + tp)
+
+
+def plotROC(N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    theta = np.arange(0, sigma, sigma / N)
+    fpr = []
+    fnr = []
+    for i in theta:
+        fpr.append(falsepos(i, N, alpha, A, sigma, noisetype))
+        fnr.append(falseneg(i, N, alpha, A, sigma, noisetype))
+    
+    plt.scatter(fpr, fnr)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.show()
