@@ -64,7 +64,7 @@ def plot_comparison():
 
 
 # going to have this return an array of indexes instead for now, will be more useful
-def detectioncounts(si, y, theta):
+def detect_indices(si, y, theta):
     tp, fn, fp, tn = [], [], [], []
     ele = 0
     while ele < len(y):
@@ -74,14 +74,14 @@ def detectioncounts(si, y, theta):
                 # then the element should be greater than theta i.e. true positive
                 tp.append(ele)
             else:
-                # if not then it is a false positive
-                fp.append(ele)
+                # if not then it is a false negative
+                fn.append(ele)
 
         # if the element is not a signal            
         else:
             if y[ele] >= theta:
-                # if this is greater than or equal to theta but it is not a signal it is a false negative
-                fn.append(ele)
+                # if this is greater than or equal to theta but it is not a signal it is a false positive
+                fp.append(ele)
             else:
                 # otherwise it is a true negative
                 tn.append(ele)
@@ -89,37 +89,43 @@ def detectioncounts(si, y, theta):
     return tp, fn, fp, tn
 
 
+def detectioncounts(si, y, theta):
+    tp, fn, fp, tn = detect_indices(si, y, theta)
+    return len(tp), len(fn), len(fp), len(tn)
 
 
 def plot_detection_types(si, y, theta, title="Graph with detection types"):
-    tp, fn, fp, tn = detectioncounts(si, y, theta)
+    tp, fn, fp, tn = detect_indices(si, y, theta)
     plt.plot(y)
-    plt.axhline(theta, c="red", label = "threshold")
+    plt.axhline(theta, c="red", label = f'threshold = {theta}')
 
     # plot the tp, fp, and fn
+    plotted = []
     for i in tp:
-        plt.scatter(i, y[i], c="blue",marker="o" , label="True Positives")
+        label = "True Positives"
+        if label not in plotted:
+            plt.scatter(i, y[i], c="blue", marker="o", label="True Positives")
+            plotted.append(label)
+        else:
+            plt.scatter(i, y[i], c="blue", marker="o")
     
     for i in fp:
-        plt.scatter(i, y[i], c="green",marker="^" , label="False Positives")
+        label = "False Positives"
+        if label not in plotted:
+            plt.scatter(i, y[i], c="green", marker="^", label="False Positives")
+            plotted.append(label)
+        else:
+            plt.scatter(i, y[i], c="green", marker="^")
     
     for i in fn:
-        plt.scatter(i, y[i], c="orange", marker="s" , label="False Negatives")
-
+        label = "False Negatives"
+        if label not in plotted:
+            plt.scatter(i, y[i], c="orange", marker="s", label="False Negatives")
+            plotted.append(label)
+        else:
+            plt.scatter(i, y[i], c="orange", marker="s")
 
     plt.legend()
     plt.title(title)
     plt.show()
 
-
-si = [0, 4]
-y = [0, 1, 2, 3, 4, 5, 6]
-theta = 2
-plot_detection_types(si, y, theta)
-# tp - 4
-# fn - 2, 3, 5, 6
-# fp - 0
-# tn, 1
-
-# plot_genwaveform()
-# plot_comparison()
