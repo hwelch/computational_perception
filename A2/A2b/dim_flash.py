@@ -6,15 +6,14 @@ def randtimes(N, t1, t2):
     return np.random.uniform(t1, t2, N)
 
 
-def plotflash(N, t1, t2):
-    x = randtimes(N, t1, t2)
-    y = np.ones(N)
+def plotflash(x, t1, t2):
+    y = np.ones(len(x))
     plt.stem(x, y, markerfmt=' ', basefmt=' ')
-    plt.title(f'Plot of {N} random times from [{t1}, {t2})')
+    plt.title(f'Plot of {len(x)} random times from [{t1}, {t2})')
     plt.show()
 
 
-def randintervals(N, l, t1):
+def randintervals(N, l=10, t1=0):
     y = [t1]
     indx = 1
     t_x = t1
@@ -23,15 +22,6 @@ def randintervals(N, l, t1):
         y.append(t_x)
         indx += 1
     return np.array(y)
-
-
-def plotrandintervals(N, l, t1):
-    x = randintervals(N, l, t1)
-    print(N, len(x))
-    y = np.ones(N)
-    plt.stem(x, y, markerfmt=' ', basefmt=' ')
-    plt.title(f'Plot of {N} random times starting at {t1} at a rate of {l}')
-    plt.show()
 
 
 def poisson_pmf(N, l, T):
@@ -51,7 +41,7 @@ def plot_poisson_pmf(N, l, T):
 def detectionprob(K, l=40, T=0.1):
     i = 0
     cdf = 0
-    while i < K:
+    while i < K-1:
         cdf += poisson_pmf(i, l, T)
         i += 1
     return cdf
@@ -66,7 +56,7 @@ def plotdetectionprob(K, l=40, T=0.1):
     plt.bar(x,y)
     plt.xlabel('N')
     plt.ylabel('Probability of detecting photon')
-    plt.title(f'CDF of {K-1} events at rate {l} and time interval {T}')
+    plt.title(f'CDF of events at rate {l} and time interval {T}')
     plt.show()
 
 
@@ -111,4 +101,51 @@ def plotlightflash(l, s1=1, s2=2):
 def probseeing(I, a=0.06, K=6):
     return 1 - poisson.cdf(K-1, I*a)
 
-probseeing(1000)
+
+def detectioncurve(a=0.5, K=6):
+    I = np.arange(0.01, 100, 0.001)
+    return I, probseeing(I, a, K)
+
+
+def plotdetectioncurve(a=0.5, K=6):
+    assert type(a) == float and type(K) == int or len(a) == len(K)
+
+    if type(a) == float:
+        I, prob = detectioncurve(a, K)
+        plt.plot(I, prob, label=f'a = {a} K = {K}')
+    else:
+        i = 0
+        while i < len(a):
+            I, prob = detectioncurve(a[i], K[i])
+            plt.plot(I, prob, label=f'a = {a[i]} K = {K[i]}')
+            i += 1
+
+    plt.xscale('log')
+    
+    plt.xlabel("log(I)")
+    plt.ylabel("Percentage of light flashes")
+    plt.legend()
+    plt.title("Percentage of light flashes as a function of I")
+    plt.show()
+
+
+def plotfit(a=3, K=3):
+    I, prob = detectioncurve(0.02, 2)
+    plt.plot(I, prob, label='a = 0.02 K = 2')
+    I2, prob2 = detectioncurve(0.13, 12)
+    plt.plot(I2, prob2, label='a = 0.13 K = 12')
+
+    avg_photons = [24.1, 37.6, 58.6, 91.0, 141.9, 221.3]
+    percents =  [0.0,  0.04, 0.18, 0.54, 0.94, 1.00]
+
+    I, prob = detectioncurve(a, K)
+    plt.plot(I, prob, label=f'a = {a} K = {K}')
+
+    plt.scatter(avg_photons, percents)
+    plt.xscale('log')
+    plt.xlabel("log(I)")
+    plt.ylabel("Percentage of light flashes")
+    plt.legend()
+    plt.title("Percentage of light flashes as a function of I")
+    plt.show()
+
