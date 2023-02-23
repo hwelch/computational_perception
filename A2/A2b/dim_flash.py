@@ -13,6 +13,14 @@ def plotflash(x, t1, t2):
     plt.show()
 
 
+def plot_exponential_distribution(l):
+    x = np.linspace(0, 5/l, 1000)
+    y = l * np.exp(x * -l)
+    plt.plot(x,y)
+    plt.title(f'Exponential distribution with rate of {l}')
+    plt.show()
+
+
 def randintervals(N, l=10, t1=0):
     y = [t1]
     indx = 1
@@ -41,10 +49,10 @@ def plot_poisson_pmf(N, l, T):
 def detectionprob(K, l=40, T=0.1):
     i = 0
     cdf = 0
-    while i < K-1:
+    while i < K:
         cdf += poisson_pmf(i, l, T)
         i += 1
-    return cdf
+    return 1 - cdf
 
 
 def plotdetectionprob(K, l=40, T=0.1):
