@@ -149,6 +149,9 @@ def plotfit(a=3, K=3):
     I, prob = detectioncurve(a, K)
     plt.plot(I, prob, label=f'a = {a} K = {K}')
 
+    I, prob = detectioncurve(0.06, 6)
+    plt.plot(I, prob, label='Optimal Values for data')
+
     plt.scatter(avg_photons, percents)
     plt.xscale('log')
     plt.xlabel("log(I)")

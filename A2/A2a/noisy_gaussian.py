@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm, uniform
 
 # function to generate a waveform
 def genwaveform(N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
@@ -130,24 +131,27 @@ def plot_detection_types(si, y, theta, title="Graph with detection types"):
     plt.show()
 
 
-def falsepos(theta, N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
-    waveform, event_indices = genwaveform(N, alpha, A, sigma, noisetype)
-    tp, fn, fp, tn = detectioncounts(event_indices, waveform, theta)
-    return fp / (fp + tn)
-
-def falseneg(theta, N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
-    waveform, event_indices = genwaveform(N, alpha, A, sigma, noisetype)
-    tp, fn, fp, tn = detectioncounts(event_indices, waveform, theta)
-    return fn / (fn + tp)
+def falsepos(theta, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    if noisetype == "Gaussian":
+        return 1 - norm.cdf(theta, 0, sigma)
+    else:
+        return 1 - uniform.cdf(theta, 0, sigma)
 
 
-def plotROC(N=100, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
-    theta = np.arange(0, sigma, sigma / N)
+def falseneg(theta, alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    if noisetype == "Gaussian":
+        return norm.cdf(theta, A, sigma)
+    else:
+        return uniform.cdf(theta, A, sigma)
+
+
+def plotROC(alpha=0.1, A=1, sigma=1, noisetype="Gaussian"):
+    theta = np.arange(0, 4 * sigma, sigma / 1000)
     fpr = []
     fnr = []
     for i in theta:
-        fpr.append(falsepos(i, N, alpha, A, sigma, noisetype))
-        fnr.append(falseneg(i, N, alpha, A, sigma, noisetype))
+        fpr.append(falsepos(i, alpha, A, sigma, noisetype))
+        fnr.append(falseneg(i, alpha, A, sigma, noisetype))
     
     plt.scatter(fpr, fnr)
     plt.xlabel('False Positive Rate')
